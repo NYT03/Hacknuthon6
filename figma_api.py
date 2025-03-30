@@ -1,14 +1,15 @@
 import os
-from dotenv import load_dotenv
+
 import requests
+from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Get Figma token from .env
 FIGMA_ACCESS_TOKEN = os.getenv("FIGMA_ACCESS_TOKEN")
-
-def fetch_figma_data(endpoint_type, param):
+# print(FIGMA_ACCESS_TOKEN)
+def fetch_figma_data(endpoint_type, param, query_params=None):
     """Fetch data from the Figma API."""
     
     # Define base URL
@@ -40,11 +41,11 @@ def fetch_figma_data(endpoint_type, param):
     
     # Set headers
     headers = {
-        "Authorization": f"Bearer {FIGMA_ACCESS_TOKEN}"
+        "X-Figma-Token": f"{FIGMA_ACCESS_TOKEN}"
     }
 
     # Make API request
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, params=query_params)
 
     # Return response or error
     if response.status_code == 200:

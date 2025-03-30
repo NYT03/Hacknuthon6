@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Selenium Test</title>
+    <script>
+        async function uploadFile(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            const formData = new FormData(event.target);
+            const responseElement = document.getElementById('response');
+
+            try {
+                const response = await fetch('http://localhost:5000/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                console.log(response);
+                const result = await response.json();
+                event.preventDefault();
+                console.log(result);
+                if (response.ok) {
+                    console.log(result);
+                    responseElement.innerHTML = `<p style="color: green;">${result.message}</p><p>File Path: ${result.file_path}</p>`;
+                } else {
+                    responseElement.innerHTML = `<p style="color: red;">Error: ${result.error || result.details}</p>`;
+                }
+            } catch (error) {
+                responseElement.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Upload Selenium Test File</h1>
+    <form onsubmit="uploadFile(event)" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".js" required>
+        <button type="submit">Upload</button>
+    </form>
+    <div id="response"></div> <!-- This div will display the server response -->
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Case Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        #results {
+            display: none;
+            margin-top: 30px;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4 text-center">Test Case Generator</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Input Details</h5>
+            </div>
+            <div class="card-body">
+                <form id="generatorForm">
+                    <div class="mb-3">
+                        <label for="uiDescription" class="form-label">UI Description</label>
+                        <textarea class="form-control" id="uiDescription" rows="5" required placeholder="Describe the UI components..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="srsDescription" class="form-label">SRS Description</label>
+                        <textarea class="form-control" id="srsDescription" rows="5" required placeholder="Describe the requirements..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate Test Cases</button>
+                </form>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Generating test cases, please wait...</p>
+        </div>
+        
+        <div id="results">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Test Case Summary</h5>
+                </div>
+                <div class="card-body">
+                    <pre id="summaryDisplay" class="code-block"></pre>
+                    <button id="downloadSummary" class="btn btn-sm btn-outline-secondary mt-2">Download Summary</button>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Test Cases (JSON)</h5>
+                </div>
+                <div class="card-body">
+                    <pre id="jsonDisplay" class="code-block"></pre>
+                    <button id="downloadJson" class="btn btn-sm btn-outline-secondary mt-2">Download JSON</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('generatorForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const uiDescription = document.getElementById('uiDescription').value;
+            const srsDescription = document.getElementById('srsDescription').value;
+            
+            // Show loading indicator
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        ui_description: uiDescription,
+                        srs_description: srsDescription
+                    }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Hide loading, show results
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
+                
+                // Display results
+                document.getElementById('summaryDisplay').textContent = data.summary;
+                document.getElementById('jsonDisplay').textContent = JSON.stringify(data.test_cases, null, 2);
+                
+                // Set up download buttons
+                const timestamp = data.timestamp;
+                
+                document.getElementById('downloadSummary').onclick = function() {
+                    window.location.href = `/download/summary/${timestamp}?summary=${encodeURIComponent(data.summary)}`;
+                };
+                
+                document.getElementById('downloadJson').onclick = function() {
+                    window.location.href = `/download/json/${timestamp}?test_cases=${encodeURIComponent(JSON.stringify(data.test_cases))}`;
+                };
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').style.display = 'none';
+                alert('Error generating test cases: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

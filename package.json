@@ -1,0 +1,19 @@
+{
+  "name": "hacknuthon6",
+  "version": "1.0.0",
+  "description": "\"# Hacknuthon6\"",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chromedriver": "^134.0.5",
+    "selenium-webdriver": "^4.30.0"
+  },
+  "devDependencies": {
+    "mocha": "^11.1.0"
+  }
+}
